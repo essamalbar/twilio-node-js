@@ -1,0 +1,220 @@
+<html>
+<haed>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</haed>
+
+<body>
+    <div id="app">
+
+        <form>
+
+            <label from='phone'>Phone number</label>
+            <input type='number' id="phone" v-model="phonenumber" />
+            <button @click="(e)=>{show(e)}">Submit</button>
+            <modal v-if="showModal" @close="showModal = false" v-bind:phonenumber="phonenumber">
+                <!--
+                      you can use custom content here to overwrite
+                      default content
+                    -->
+                <h3 slot="header">Tirms And Conditions</h3>
+
+            </modal>
+
+            <h1>{{message}}</h1>
+
+        </form>
+        <script type="text/x-template" id="modal-template">
+                <transition name="modal">
+                  <div class="modal-mask">
+                    <div class="modal-wrapper">
+                      <div class="modal-container">
+              
+                        <div class="modal-header">
+                          <slot name="header">
+                            default header
+                          </slot>
+                        </div>
+              
+                        <div class="modal-body">
+                          <slot name="body">
+                                <a href="https://www.privacypolicies.com/terms/view/806ef2285ab3a4c7357c5a5b07f21f1f">Terms And Conditions</a>
+                          </slot>
+                        </div>
+              
+                        <div class="modal-footer">
+                          <slot name="footer">
+                                <input type="checkbox" id="age" v-model="age"/>
+                                <label for="age" >I Am over 18</label>
+                                <br/>
+                                <input type="checkbox" id="terms"  v-model="terms"/>
+                                <label for="terms" >I accept Termes And Condition</label>
+                                <br/>
+                            
+                            <button class="modal-default-button" @click="(e)=>{submit(e)}">
+                              OK
+                            </button>
+                            <br />
+                          </slot>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </transition>
+              </script>
+
+
+    </div>
+
+
+
+
+
+
+
+
+</body>
+
+
+<script>
+
+    Vue.component('modal', {
+        props:["phonenumber"],
+        data() {
+            return {
+                age: false,
+                terms: false
+            }
+        },
+        methods: {
+            submit(e) {
+                e.preventDefault();
+                var url = "http://localhost:1337/api/sms-promotion";
+                console.log(
+                    this.phonenumber,
+                    this.age,
+                    this.terms
+                );
+                this.$emit('close');
+                
+                if (this.age && this.terms) {
+                    axios.post(url, { phonenumber: this.phonenumber }).then(res => {
+                        console.log(res);
+                        let response = res.data;
+                        if (response.data == null) {
+                            alert("Faild to send message .try again");
+                        } else {
+                            alert('success send message');
+                        }
+
+                    });
+                }else{
+                    alert('you must accept condition and terms');
+                }
+
+                
+
+
+
+
+            }
+        },
+
+        template: '#modal-template',
+
+    });
+
+
+    var app = new Vue({
+        el: '#app',
+        data: {
+            phonenumber: '',
+            message: 'Hello Vue!',
+            message: '',
+            showModal: false,
+
+
+        },
+        methods: {
+            show(e) {
+                e.preventDefault();
+                if(!this.phonenumber){
+                    alert('Please enter your phone number');
+                }else{
+                    this.showModal = true;
+                }
+                
+
+            }
+        }
+    })
+</script>
+
+<style>
+    .modal-mask {
+        position: fixed;
+        z-index: 9998;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .5);
+        display: table;
+        transition: opacity .3s ease;
+    }
+
+    .modal-wrapper {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    .modal-container {
+        width: 300px;
+        margin: 0px auto;
+        padding: 20px 30px;
+        background-color: #fff;
+        border-radius: 2px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+        transition: all .3s ease;
+        font-family: Helvetica, Arial, sans-serif;
+    }
+
+    .modal-header h3 {
+        margin-top: 0;
+        color: #42b983;
+    }
+
+    .modal-body {
+        margin: 20px 0;
+    }
+
+    .modal-default-button {
+        float: right;
+    }
+
+    /*
+               * The following styles are auto-applied to elements with
+               * transition="modal" when their visibility is toggled
+               * by Vue.js.
+               *
+               * You can easily play with the modal transition by editing
+               * these styles.
+               */
+
+    .modal-enter {
+        opacity: 0;
+    }
+
+    .modal-leave-active {
+        opacity: 0;
+    }
+
+    .modal-enter .modal-container,
+    .modal-leave-active .modal-container {
+        -webkit-transform: scale(1.1);
+        transform: scale(1.1);
+    }
+</style>
+
+
+</html>
